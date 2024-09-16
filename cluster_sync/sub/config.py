@@ -5,5 +5,6 @@ sub_config = {
     "REDIS_PORT": 6379,
     "REDIS_DB": 0,
     "REDIS_QUEUE": "msgs_queue_sub",
-    "RABBIT_HOST": "broker"
+    "RABBIT_HOST": env["RABBIT"],
+    "RABBIT_PORT": 5672,
 }

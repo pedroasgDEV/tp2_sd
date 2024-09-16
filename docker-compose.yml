@@ -1,4 +1,27 @@
-version: latest
+networks:
+  net_pika:
+    driver: bridge
+  redis1_net:
+    driver: bridge
+  redis2_net:
+    driver: bridge
+  redis3_net:
+    driver: bridge
+  redis4_net:
+    driver: bridge
+  redis5_net:
+    driver: bridge
+  cluster1_net:
+    driver: bridge
+  cluster2_net:
+    driver: bridge
+  cluster3_net:
+    driver: bridge
+  cluster4_net:
+    driver: bridge
+  cluster5_net:
+    driver: bridge
+
 services:
 ################################# BROKER #################################
 
@@ -6,9 +29,16 @@ services:
     image: rabbitmq:latest
     ports:
       - "5672:5672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
     networks:
       - net_pika
     restart: always
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      retries: 5
 
 ################################# REDIS #################################
   
@@ -16,7 +46,8 @@ services:
   redis1:
     image: redis:latest
     depends_on:
-      - broker
+      broker:
+        condition: service_healthy
     environment:
       - REDIS_PASSWORD=guest
       - REDIS_PORT=6379
@@ -28,7 +59,8 @@ services:
   redis2:
     image: redis:latest
     depends_on:
-      - broker
+      broker:
+        condition: service_healthy
     environment:
       - REDIS_PASSWORD=guest
       - REDIS_PORT=6379
@@ -40,7 +72,8 @@ services:
   redis3:
     image: redis:latest
     depends_on:
-      - broker
+      broker:
+        condition: service_healthy
     environment:
       - REDIS_PASSWORD=guest
       - REDIS_PORT=6379
@@ -52,7 +85,8 @@ services:
   redis4:
     image: redis:latest
     depends_on:
-      - broker
+      broker:
+        condition: service_healthy
     environment:
       - REDIS_PASSWORD=guest
       - REDIS_PORT=6379
@@ -64,7 +98,8 @@ services:
   redis5:
     image: redis:latest
     depends_on:
-      - broker
+      broker:
+        condition: service_healthy
     environment:
       - REDIS_PASSWORD=guest
       - REDIS_PORT=6379
@@ -78,6 +113,7 @@ services:
     build: ./cluster_sync/main/
     depends_on:
       - redis1
+      - pub1
     environment:
       - REDIS=redis1
       - CLUSTER_ID=1
@@ -90,6 +126,7 @@ services:
     build: ./cluster_sync/main/
     depends_on:
       - redis2
+      - pub2
     environment:
       - REDIS=redis2
       - CLUSTER_ID=2
@@ -102,6 +139,7 @@ services:
     build: ./cluster_sync/main/
     depends_on:
       - redis3
+      - pub3
     environment:
       - REDIS=redis3
       - CLUSTER_ID=3
@@ -114,6 +152,7 @@ services:
     build: ./cluster_sync/main/
     depends_on:
       - redis4
+      - pub4
     environment:
       - REDIS=redis4
       - CLUSTER_ID=4
@@ -126,6 +165,7 @@ services:
     build: ./cluster_sync/main/
     depends_on:
       - redis5
+      - pub5
     environment:
       - REDIS=redis5
       - CLUSTER_ID=5
@@ -141,8 +181,10 @@ services:
     build: ./cluster_sync/pub/
     depends_on:
       - redis1
+      - sub1
     environment:
       - REDIS=redis1
+      - RABBIT=broker
     networks:
       - net_pika
       - redis1_net
@@ -154,6 +196,7 @@ services:
       - redis1
     environment:
       - REDIS=redis1
+      - RABBIT=broker
     networks:
       - net_pika
       - redis1_net
@@ -164,8 +207,10 @@ services:
     build: ./cluster_sync/pub/
     depends_on:
       - redis2
+      - sub2
     environment:
       - REDIS=redis2
+      - RABBIT=broker
     networks:
       - net_pika
       - redis2_net
@@ -177,6 +222,7 @@ services:
       - redis2
     environment:
       - REDIS=redis2
+      - RABBIT=broker
     networks:
       - net_pika
       - redis2_net
@@ -187,8 +233,10 @@ services:
     build: ./cluster_sync/pub/
     depends_on:
       - redis3
+      - sub3
     environment:
       - REDIS=redis3
+      - RABBIT=broker
     networks:
       - net_pika
       - redis3_net
@@ -200,6 +248,7 @@ services:
       - redis3
     environment:
       - REDIS=redis3
+      - RABBIT=broker
     networks:
       - net_pika
       - redis3_net
@@ -210,8 +259,10 @@ services:
     build: ./cluster_sync/pub/
     depends_on:
       - redis4
+      - sub4
     environment:
       - REDIS=redis4
+      - RABBIT=broker
     networks:
       - net_pika
       - redis4_net
@@ -223,6 +274,7 @@ services:
       - redis4
     environment:
       - REDIS=redis4
+      - RABBIT=broker
     networks:
       - net_pika
       - redis4_net
@@ -233,8 +285,10 @@ services:
     build: ./cluster_sync/pub/
     depends_on:
       - redis5
+      - sub5
     environment:
       - REDIS=redis5
+      - RABBIT=broker
     networks:
       - net_pika
       - redis5_net
@@ -246,6 +300,7 @@ services:
       - redis5
     environment:
       - REDIS=redis5
+      - RABBIT=broker
     networks:
       - net_pika
       - redis5_net
@@ -259,6 +314,10 @@ services:
     build: ./client
     depends_on:
       - cluster_sync_1
+      - cluster_sync_2
+      - cluster_sync_3
+      - cluster_sync_4
+      - cluster_sync_5
     environment:
       - CLIENT_ID=1
       - CLUSTER_SYNC=cluster_sync_1
@@ -269,6 +328,10 @@ services:
     build: ./client
     depends_on:
       - cluster_sync_1
+      - cluster_sync_2
+      - cluster_sync_3
+      - cluster_sync_4
+      - cluster_sync_5
     environment:
       - CLIENT_ID=2
       - CLUSTER_SYNC=cluster_sync_1
@@ -280,7 +343,11 @@ services:
   client_3:
     build: ./client
     depends_on:
+      - cluster_sync_1
       - cluster_sync_2
+      - cluster_sync_3
+      - cluster_sync_4
+      - cluster_sync_5
     environment:
       - CLIENT_ID=3
       - CLUSTER_SYNC=cluster_sync_2
@@ -290,7 +357,11 @@ services:
   client_4:
     build: ./client
     depends_on:
+      - cluster_sync_1
       - cluster_sync_2
+      - cluster_sync_3
+      - cluster_sync_4
+      - cluster_sync_5
     environment:
       - CLIENT_ID=4
       - CLUSTER_SYNC=cluster_sync_2
@@ -301,7 +372,11 @@ services:
   client_5:
     build: ./client
     depends_on:
+      - cluster_sync_1
+      - cluster_sync_2
       - cluster_sync_3
+      - cluster_sync_4
+      - cluster_sync_5
     environment:
       - CLIENT_ID=5
       - CLUSTER_SYNC=cluster_sync_3
@@ -311,7 +386,11 @@ services:
   client_6:
     build: ./client
     depends_on:
+      - cluster_sync_1
+      - cluster_sync_2
       - cluster_sync_3
+      - cluster_sync_4
+      - cluster_sync_5
     environment:
       - CLIENT_ID=6
       - CLUSTER_SYNC=cluster_sync_3
@@ -323,7 +402,11 @@ services:
   client_7:
     build: ./client
     depends_on:
+      - cluster_sync_1
+      - cluster_sync_2
+      - cluster_sync_3
       - cluster_sync_4
+      - cluster_sync_5
     environment:
       - CLIENT_ID=7
       - CLUSTER_SYNC=cluster_sync_4
@@ -333,7 +416,11 @@ services:
   client_8:
     build: ./client
     depends_on:
+      - cluster_sync_1
+      - cluster_sync_2
+      - cluster_sync_3
       - cluster_sync_4
+      - cluster_sync_5
     environment:
       - CLIENT_ID=8
       - CLUSTER_SYNC=cluster_sync_4
@@ -345,6 +432,10 @@ services:
   client_9:
     build: ./client
     depends_on:
+      - cluster_sync_1
+      - cluster_sync_2
+      - cluster_sync_3
+      - cluster_sync_4
       - cluster_sync_5
     environment:
       - CLIENT_ID=9
@@ -355,6 +446,10 @@ services:
   client_10:
     build: ./client
     depends_on:
+      - cluster_sync_1
+      - cluster_sync_2
+      - cluster_sync_3
+      - cluster_sync_4
       - cluster_sync_5
     environment:
       - CLIENT_ID=10
@@ -362,15 +457,3 @@ services:
     networks:
       - cluster5_net
 
-networks:
-  net_pika:
-  redis1_net:
-  redis2_net:
-  redis3_net:
-  redis4_net:
-  redis5_net:
-  cluster1_net:
-  cluster2_net:
-  cluster3_net:
-  cluster4_net:
-  cluster5_net:
