@@ -184,6 +184,7 @@ services:
       - sub1
     environment:
       - REDIS=redis1
+      - RABBIT=broker
     networks:
       - net_pika
       - redis1_net
@@ -195,6 +196,7 @@ services:
       - redis1
     environment:
       - REDIS=redis1
+      - RABBIT=broker
     networks:
       - net_pika
       - redis1_net
@@ -208,6 +210,7 @@ services:
       - sub2
     environment:
       - REDIS=redis2
+      - RABBIT=broker
     networks:
       - net_pika
       - redis2_net
@@ -219,6 +222,7 @@ services:
       - redis2
     environment:
       - REDIS=redis2
+      - RABBIT=broker
     networks:
       - net_pika
       - redis2_net
@@ -232,6 +236,7 @@ services:
       - sub3
     environment:
       - REDIS=redis3
+      - RABBIT=broker
     networks:
       - net_pika
       - redis3_net
@@ -243,6 +248,7 @@ services:
       - redis3
     environment:
       - REDIS=redis3
+      - RABBIT=broker
     networks:
       - net_pika
       - redis3_net
@@ -256,6 +262,7 @@ services:
       - sub4
     environment:
       - REDIS=redis4
+      - RABBIT=broker
     networks:
       - net_pika
       - redis4_net
@@ -267,6 +274,7 @@ services:
       - redis4
     environment:
       - REDIS=redis4
+      - RABBIT=broker
     networks:
       - net_pika
       - redis4_net
@@ -280,6 +288,7 @@ services:
       - sub5
     environment:
       - REDIS=redis5
+      - RABBIT=broker
     networks:
       - net_pika
       - redis5_net
@@ -291,6 +300,7 @@ services:
       - redis5
     environment:
       - REDIS=redis5
+      - RABBIT=broker
     networks:
       - net_pika
       - redis5_net

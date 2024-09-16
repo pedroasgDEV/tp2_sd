@@ -11,24 +11,19 @@ class Client:
         
     def __start(self):
         for i in range(self.__qnt_msgs):
-            #hora de envio da mensagem
             timestamp = time.time()
             
-            #Gera a mensagem a ser enviada
             message = {
                     "client_id" : self.__client_id,
                     "timestamp" : timestamp,
                 }
             
-            #Envia a mensagem para ao cluster_sync
             response = requests.post(self.__cluster_url, json = message)
             
-            #verifica envio
             if response.status_code == 200:
                 
-                # Extrair o JSON da resposta
                 response_json = response.json()
-                
+
                 if response_json.get("menssage") == "COMMITTED":
                      time.sleep(random.randint(1, 5))
                      
