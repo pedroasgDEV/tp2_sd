@@ -1,27 +1,27 @@
 import requests
 import random
 import time
-from os import environ as env
-
+from cofig import client_config
 class Client:
-    def __init__(self):
-        self.client_id = env["CLIENT_ID"]
-        self.cluster_url = "http://" + env["CLUSTER_SYNC"] + ":5000/" #define o link da rede
-        self.qnt_msgs = random.randint(10, 50)
+    def __init__(self, client_id: int = 1, cluster_url: str = "localhost"):
+        self.__client_id = client_id
+        self.__cluster_url = "http://" + cluster_url + ":5000/" #define o link da rede
+        self.__qnt_msgs = random.randint(10, 50)
+        self.__start()
         
-    def start(self):
-        for i in range(self.qnt_msgs):
+    def __start(self):
+        for i in range(self.__qnt_msgs):
             #hora de envio da mensagem
             timestamp = time.time()
             
             #Gera a mensagem a ser enviada
             message = {
-                    "client_id" : self.client_id,
+                    "client_id" : self.__client_id,
                     "timestamp" : timestamp,
                 }
             
             #Envia a mensagem para ao cluster_sync
-            response = requests.post(self.cluster_url, json = message)
+            response = requests.post(self.__cluster_url, json = message)
             
             #verifica envio
             if response.status_code == 200:
@@ -40,5 +40,4 @@ class Client:
                        
 
 if __name__ == "__main__":
-    client = Client()
-    client.start()
+    client = Client(client_config["CLIENT_ID"], client_config["CLUSTER_SYNC"])
