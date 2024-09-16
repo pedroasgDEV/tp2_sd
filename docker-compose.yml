@@ -1,0 +1,376 @@
+version: latest
+services:
+################################# BROKER #################################
+
+  broker:
+    image: rabbitmq:latest
+    ports:
+      - "5672:5672"
+    networks:
+      - net_pika
+    restart: always
+
+################################# REDIS #################################
+  
+  #cluster_sync_1
+  redis1:
+    image: redis:latest
+    depends_on:
+      - broker
+    environment:
+      - REDIS_PASSWORD=guest
+      - REDIS_PORT=6379
+    networks:
+      - redis1_net
+    restart: always
+  
+  #cluster_sync_2
+  redis2:
+    image: redis:latest
+    depends_on:
+      - broker
+    environment:
+      - REDIS_PASSWORD=guest
+      - REDIS_PORT=6379
+    networks:
+      - redis2_net
+    restart: always
+  
+  #cluster_sync_3
+  redis3:
+    image: redis:latest
+    depends_on:
+      - broker
+    environment:
+      - REDIS_PASSWORD=guest
+      - REDIS_PORT=6379
+    networks:
+      - redis3_net
+    restart: always
+  
+  #cluster_sync_4
+  redis4:
+    image: redis:latest
+    depends_on:
+      - broker
+    environment:
+      - REDIS_PASSWORD=guest
+      - REDIS_PORT=6379
+    networks:
+      - redis4_net
+    restart: always
+  
+  #cluster_sync_5
+  redis5:
+    image: redis:latest
+    depends_on:
+      - broker
+    environment:
+      - REDIS_PASSWORD=guest
+      - REDIS_PORT=6379
+    networks:
+      - redis5_net
+    restart: always
+
+################################# CLUSTER SYNC #################################
+
+  cluster_sync_1:
+    build: ./cluster_sync/main/
+    depends_on:
+      - redis1
+    environment:
+      - REDIS=redis1
+      - CLUSTER_ID=1
+    networks:
+      - cluster1_net
+      - redis1_net
+    restart: always
+
+  cluster_sync_2:
+    build: ./cluster_sync/main/
+    depends_on:
+      - redis2
+    environment:
+      - REDIS=redis2
+      - CLUSTER_ID=2
+    networks:
+      - cluster2_net
+      - redis2_net
+    restart: always
+  
+  cluster_sync_3:
+    build: ./cluster_sync/main/
+    depends_on:
+      - redis3
+    environment:
+      - REDIS=redis3
+      - CLUSTER_ID=3
+    networks:
+      - cluster3_net
+      - redis3_net
+    restart: always
+
+  cluster_sync_4:
+    build: ./cluster_sync/main/
+    depends_on:
+      - redis4
+    environment:
+      - REDIS=redis4
+      - CLUSTER_ID=4
+    networks:
+      - cluster4_net
+      - redis4_net
+    restart: always
+
+  cluster_sync_5:
+    build: ./cluster_sync/main/
+    depends_on:
+      - redis5
+    environment:
+      - REDIS=redis5
+      - CLUSTER_ID=5
+    networks:
+      - cluster5_net
+      - redis5_net
+    restart: always
+
+################################# PUB/SUB #################################
+
+#------------------ Cluster Sync 1 ------------------
+  pub1:
+    build: ./cluster_sync/pub/
+    depends_on:
+      - redis1
+    environment:
+      - REDIS=redis1
+    networks:
+      - net_pika
+      - redis1_net
+    restart: always
+
+  sub1:
+    build: ./cluster_sync/sub/
+    depends_on:
+      - redis1
+    environment:
+      - REDIS=redis1
+    networks:
+      - net_pika
+      - redis1_net
+    restart: always
+
+#------------------ Cluster Sync 2 ------------------
+  pub2:
+    build: ./cluster_sync/pub/
+    depends_on:
+      - redis2
+    environment:
+      - REDIS=redis2
+    networks:
+      - net_pika
+      - redis2_net
+    restart: always
+
+  sub2:
+    build: ./cluster_sync/sub/
+    depends_on:
+      - redis2
+    environment:
+      - REDIS=redis2
+    networks:
+      - net_pika
+      - redis2_net
+    restart: always
+
+#------------------ Cluster Sync 3 ------------------
+  pub3:
+    build: ./cluster_sync/pub/
+    depends_on:
+      - redis3
+    environment:
+      - REDIS=redis3
+    networks:
+      - net_pika
+      - redis3_net
+    restart: always
+
+  sub3:
+    build: ./cluster_sync/sub/
+    depends_on:
+      - redis3
+    environment:
+      - REDIS=redis3
+    networks:
+      - net_pika
+      - redis3_net
+    restart: always
+
+#------------------ Cluster Sync 4 ------------------
+  pub4:
+    build: ./cluster_sync/pub/
+    depends_on:
+      - redis4
+    environment:
+      - REDIS=redis4
+    networks:
+      - net_pika
+      - redis4_net
+    restart: always
+
+  sub4:
+    build: ./cluster_sync/sub/
+    depends_on:
+      - redis4
+    environment:
+      - REDIS=redis4
+    networks:
+      - net_pika
+      - redis4_net
+    restart: always
+
+#------------------ Cluster Sync 5 ------------------
+  pub5:
+    build: ./cluster_sync/pub/
+    depends_on:
+      - redis5
+    environment:
+      - REDIS=redis5
+    networks:
+      - net_pika
+      - redis5_net
+    restart: always
+
+  sub5:
+    build: ./cluster_sync/sub/
+    depends_on:
+      - redis5
+    environment:
+      - REDIS=redis5
+    networks:
+      - net_pika
+      - redis5_net
+    restart: always
+
+
+################################# CLIENTS #################################
+
+#------------------ Cluster Sync 1 ------------------
+  client_1:
+    build: ./client
+    depends_on:
+      - cluster_sync_1
+    environment:
+      - CLIENT_ID=1
+      - CLUSTER_SYNC=cluster_sync_1
+    networks:
+      - cluster1_net
+
+  client_2:
+    build: ./client
+    depends_on:
+      - cluster_sync_1
+    environment:
+      - CLIENT_ID=2
+      - CLUSTER_SYNC=cluster_sync_1
+    networks:
+      - cluster1_net
+
+#------------------ Cluster Sync 2 ------------------
+
+  client_3:
+    build: ./client
+    depends_on:
+      - cluster_sync_2
+    environment:
+      - CLIENT_ID=3
+      - CLUSTER_SYNC=cluster_sync_2
+    networks:
+      - cluster2_net
+
+  client_4:
+    build: ./client
+    depends_on:
+      - cluster_sync_2
+    environment:
+      - CLIENT_ID=4
+      - CLUSTER_SYNC=cluster_sync_2
+    networks:
+      - cluster2_net
+
+#------------------ Cluster Sync 3 ------------------
+  client_5:
+    build: ./client
+    depends_on:
+      - cluster_sync_3
+    environment:
+      - CLIENT_ID=5
+      - CLUSTER_SYNC=cluster_sync_3
+    networks:
+      - cluster3_net
+
+  client_6:
+    build: ./client
+    depends_on:
+      - cluster_sync_3
+    environment:
+      - CLIENT_ID=6
+      - CLUSTER_SYNC=cluster_sync_3
+    networks:
+      - cluster3_net
+
+#------------------ Cluster Sync 4 ------------------
+
+  client_7:
+    build: ./client
+    depends_on:
+      - cluster_sync_4
+    environment:
+      - CLIENT_ID=7
+      - CLUSTER_SYNC=cluster_sync_4
+    networks:
+      - cluster4_net
+
+  client_8:
+    build: ./client
+    depends_on:
+      - cluster_sync_4
+    environment:
+      - CLIENT_ID=8
+      - CLUSTER_SYNC=cluster_sync_4
+    networks:
+      - cluster4_net
+
+#------------------ Cluster Sync 5 ------------------
+
+  client_9:
+    build: ./client
+    depends_on:
+      - cluster_sync_5
+    environment:
+      - CLIENT_ID=9
+      - CLUSTER_SYNC=cluster_sync_5
+    networks:
+      - cluster5_net
+
+  client_10:
+    build: ./client
+    depends_on:
+      - cluster_sync_5
+    environment:
+      - CLIENT_ID=10
+      - CLUSTER_SYNC=cluster_sync_5
+    networks:
+      - cluster5_net
+
+networks:
+  net_pika:
+  redis1_net:
+  redis2_net:
+  redis3_net:
+  redis4_net:
+  redis5_net:
+  cluster1_net:
+  cluster2_net:
+  cluster3_net:
+  cluster4_net:
+  cluster5_net:
