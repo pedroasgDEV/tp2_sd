@@ -17,9 +17,10 @@ class Listener:
             message = self.__redis_queue_sub.pop()
             
             #Check if the menssage is empty or if is from this cluster and is a release
-            if not "EMPTY" in message.values() or not (message["cluster_id"] == cluster_config["CLUSTER_ID"] and message["state"] == "RELEASE"):
-                self.__msgs_stack.insert(0, message)   
-                self.__enter_critical()
+            if not "EMPTY" in message.values():
+                if not (message["cluster_id"] == cluster_config["CLUSTER_ID"] and message["state"] == "RELEASE"): 
+                    self.__msgs_stack.insert(0, message)   
+                    self.__enter_critical()
                 
     # Checks if this cluster can enter the critical section, based on message order        
     def __enter_critical(self) -> None:

@@ -1,7 +1,4 @@
 from flask import Flask, request, jsonify
-import time
-import random
-from typing import Dict
 import logging
 import threading
 
@@ -11,9 +8,15 @@ from listener import Listener
 
 app = Flask(__name__)
 
+log = logging.getLogger('werkzeug')
+log.disabled = True
+
 redis_connection = connection.RedisConnection(cluster_config["REDIS_HOST"], cluster_config["REDIS_PORT"], cluster_config["REDIS_DB"])
 redis_queue_pub = queue.RedisQueue(redis_connection.connect(), cluster_config["REDIS_QUEUE_PUB"])
-            
+
+listener = Listener()
+listener_thread = threading.Thread(target = listener.listen)
+listener_thread.start()
 
 @app.route('/', methods=['POST'])
 def process_json():
@@ -31,7 +34,4 @@ def process_json():
     return jsonify(response)
 
 if __name__ == '__main__':
-    listener = Listener()
-    listener_thread = threading.Thread(target = listener.listen())
-    listener_thread.start()
     app.run(host = cluster_config["CLUSTER_HOST"], port = cluster_config["CLUSTER_PORT"], debug = True)

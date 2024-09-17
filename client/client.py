@@ -5,7 +5,7 @@ from config import client_config
 class Client:
     def __init__(self, client_id: int = 1, cluster_url: str = "localhost"):
         self.__client_id = client_id
-        self.__cluster_url = "http://" + cluster_url + ":5000/" #define o link da rede
+        self.__cluster_url = "http://" + cluster_url + ":5000/"
         self.__qnt_msgs = random.randint(10, 50)
         self.__start()
         
@@ -24,7 +24,7 @@ class Client:
                 
                 response_json = response.json()
 
-                if response_json.get("menssage") == "COMMITTED":
+                if response_json["state"] == "COMMITTED":
                      time.sleep(random.randint(1, 5))
                      
                 else: 
