@@ -34,7 +34,7 @@ class Listener:
                 if msg["cluster_id"] == cluster_config["CLUSTER_ID"] and acquire_count == 1:
                     
                     #This cluster enters the critical section
-                    print("cluster_sync" + cluster_config["CLUSTER_ID"] + " entrou em seção critica", flush = True)
+                    print("cluster_sync_" + str(cluster_config["CLUSTER_ID"]) + " entrou em seção critica", flush = True)
                     time.sleep(random.uniform(0.2, 1.0))
                     
                     #Notify others that this cluster have left the critical section

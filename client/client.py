@@ -1,7 +1,7 @@
 import requests
 import random
 import time
-from cofig import client_config
+from config import client_config
 class Client:
     def __init__(self, client_id: int = 1, cluster_url: str = "localhost"):
         self.__client_id = client_id
