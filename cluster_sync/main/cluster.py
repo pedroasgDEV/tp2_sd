@@ -16,7 +16,6 @@ redis_queue_pub = queue.RedisQueue(redis_connection.connect(), cluster_config["R
 
 listener = Listener()
 listener_thread = threading.Thread(target = listener.listen)
-listener_thread.start()
 
 @app.route('/', methods=['POST'])
 def process_json():
@@ -34,4 +33,5 @@ def process_json():
     return jsonify(response)
 
 if __name__ == '__main__':
+    listener_thread.start()
     app.run(host = cluster_config["CLUSTER_HOST"], port = cluster_config["CLUSTER_PORT"], debug = True)
