@@ -41,7 +41,6 @@ class RabbitConsumer:
 
         
     def sub(self, callback) -> None:
-        msg = json.dumps(message)
         self.__channel.basic_consume(queue = self.__queue_name,
                                      on_message_callback = callback,
                                      auto_ack = True)
